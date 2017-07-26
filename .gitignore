@@ -1,0 +1,60 @@
+# Object files                                                                                                                                                                     
+*.o
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+*.bin
+
+*.dis
+*.map
+*.srec
+*.cmd
+*.su
+*.tmp
+*.swp
+tags
+
+.cproject
+.project
+.settings
+
+*.pbi
+*.sim
+*.cout
+*.wsdt
+*.wspos
+*.bat
+*.crun
+*.dni
+*.jlink
+*.dbgdt
+*.pbd
+*.browse
+
+/Temp
+/Library/metadata
+/Library/ShaderCache
+*.suo

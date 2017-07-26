@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+0=Spine , 1=Spine1 , 2=Spine2, 3=Spine3, 4=Spine4 , 5=Neck, 6=Head, 
+7=RightShoulder, 8=RightArm, 9=RightForeArm, 10=RightHand, 
+11=LeftShoulder, 12=LeftArm, 13=LeftForeArm, 14=LeftHand, 
+15=RightUpLeg, 16=RightLeg, 17=RightFoot, 18=RightToeBase,
+19=LeftUpLeg, 20=LeftLeg, 21=LeftFoot, 22=LeftToeBase
+-->
+
+<!--DefaultActor-->
+<ActorBones>
+	<bone ConnectId = "0" name = "Hips"></bone>
+	<bone ConnectId = "1" name = "Spine1"></bone>
+	<bone ConnectId = "3" name = "Spine2"></bone>
+	<bone ConnectId = "6" name = "Head"></bone>
+	
+	<bone ConnectId = "7" name = "RightShoulder"></bone>
+	<bone ConnectId = "8" name = "RightArm"></bone>
+	<bone ConnectId = "9" name = "RightUpperArm"></bone>
+	<bone ConnectId = "10" name = "RightHand"></bone>
+	
+	<bone ConnectId = "11" name = "LeftShoulder"></bone>
+	<bone ConnectId = "12" name = "LeftArm"></bone>
+	<bone ConnectId = "13" name = "LeftUpperArm"></bone>
+	<bone ConnectId = "14" name = "LeftHand"></bone>
+
+	<bone ConnectId = "15" name = "RightUpLeg"></bone>
+	<bone ConnectId = "16" name = "RightLeg"></bone>
+	<bone ConnectId = "17" name = "RightFoot"></bone>
+	<bone ConnectId = "18" name = "RightToe"></bone>
+	
+    <bone ConnectId = "19" name = "LeftUpLeg"></bone>
+	<bone ConnectId = "20" name = "LeftLeg"></bone>
+	<bone ConnectId = "21" name = "LeftFoot"></bone>
+	<bone ConnectId = "22" name = "LeftToe"></bone>
+</ActorBones>
