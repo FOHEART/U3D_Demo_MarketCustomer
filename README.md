@@ -2,7 +2,7 @@
 # Please refer Wiki pages of this project for more details
 ![MainThumb](https://raw.githubusercontent.com/FOHEART/U3D_Demo_MarketCustomer/master/Assets/Thumbnail/MarketCustomer.png)
 ======================EN===========================<br>
-##**[Version 1.2.8]**
+##**[Version 1.3.0 beta1]**
 Beijing FOHEART Co.Ltd.<br>
 1. Unzip and load scene Assets\MarketCustomer.unity.
 2. Put on [FOHEART C1](http://www.foheart.com/) mocap suit.
@@ -11,12 +11,12 @@ Beijing FOHEART Co.Ltd.<br>
 5. Select **broadcast data** in MotionVenus.
 6. Done.
 
-Compatible with MotionVenus 1.2.8<br>
+Compatible with MotionVenus 1.2.8 or higher version<br>
 Compatible with Unity3D 5.6.1f1(64bit)<br>
 Compatible with Visual Studio Ultimate 2013<br>
 
 ======================CN===========================<br>
-##**[Version 1.2.8]**
+##**[Version 1.3.0 beta1]**
 北京孚心科技有限公司<br>
 1. 下载并解压与您MotionVenus**版本号相同**的分支工程，并打开Assets\MarketCustomer.unity场景。
 2. 穿戴好[FOHEART C1](http://www.foheart.com/) 动作捕捉套装。
@@ -25,6 +25,6 @@ Compatible with Visual Studio Ultimate 2013<br>
 5. 在MotionVenus中勾选**数据转发**选项。
 6. 完成。
 
-本工程与MotionVenus v1.2.8兼容。<br>
+本工程与MotionVenus v1.2.8及更高版本兼容。<br>
 本工程与Unity3D 5.6.1f1(64bit)兼容。<br>
 本工程与Visual Studio Ultimate 2013兼容。<br>
