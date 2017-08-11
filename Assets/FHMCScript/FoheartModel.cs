@@ -17,7 +17,7 @@ namespace FoheartMC
          */
         public string ActorName;
         //接受哪个模型发来的数据
-        public string ConfigPath;
+        public string ConfigName;
 
         //是否使用远程位移
         public Vector3 HipsStartLocation;
@@ -29,40 +29,55 @@ namespace FoheartMC
         public uint ConnectPackNumber;
         //链接的包号
         protected Dictionary<uint, string> mapBoneIndex;
-        //骨骼编号,对应的骨骼名称
-        protected ActorFrameData firstFrameData;
-        //第一帧数据
-        protected bool bDataIsOK = false;
-        //数据是否已经准备好
+        class initAxisAndRot
+        {
+            public int[] xyz;
 
+            public float[] xryrzr;
+
+            public initAxisAndRot()
+            {
+                xyz = new int[3];
+                xryrzr = new float[3];
+            }
+            public void setAxis(int _x, int _y, int _z)
+            {
+                xyz[0] = _x; xyz[1] = _y; xyz[2] = _z;
+            }
+            public void setRot(float _xr, float _yr, float _zr)
+            {
+                xryrzr[0] = _xr; xryrzr[1] = _yr; xryrzr[2] = _zr;
+            }
+        }
+        Dictionary<uint, initAxisAndRot> mapBoneInitAxisTrans;
+        protected bool dataPending = false;
         protected Dictionary<string, Transform> m_mapNameAndBone;
-        //骨骼名称对应的骨骼节点
         protected Quaternion m_bodyStartQuat;
-        //模型初始的旋转
         protected Vector3 m_bodyStartPosition;
-        //模型初始位置
         ActorFrameData frameDataBuffer;
-        //动作缓存
 
-        //构造
         public FoheartModel()
         {
             ActorName = "Actor1(Live)";
-            ConfigPath = "MarketCustomerRig.xml";
+            ConfigName = "DefaultActor.xml";
         }
 
-        //模型初始化
         void Awake()
         {
             CheckCondition();
             mapBoneIndex = new Dictionary<uint, string>();
             m_mapNameAndBone = new Dictionary<string, Transform>();
+            mapBoneInitAxisTrans = new Dictionary<uint, initAxisAndRot>();
             frameDataBuffer = new ActorFrameData();
-            loadBoneMaps();//初始化使用配置文件绑定
+            loadBoneMaps();
             initNameAndBone();
             ChildAwake();
 
             Transform HipsStartTrans = FindBone(0);
+            if (HipsStartTrans == null)
+            {
+                Debug.LogError("Please check Config Name is Right or ConnectId's name is valid in Model!");
+            }
             HipsStartLocation = new Vector3(HipsStartTrans.position.x, HipsStartTrans.position.y, HipsStartTrans.position.z);
         }
 
@@ -70,11 +85,11 @@ namespace FoheartMC
         //检查是否已经指定骨骼绑定文件
         void CheckCondition()
         {
-            if (ConfigPath.Length == 0)
+            if (ConfigName.Length == 0)
             {
                 //没有指定骨骼配置文件,请先编辑好配置文件,放置在工程目录下(Assets的父目录)
-                //并手动将文件名,填写到ConfigPath中
-                Debug.LogError("ConfigPath not specified!");
+                //并手动将文件名,填写到ConfigName中
+                Debug.LogError("ConfigName not specified!");
             }
             if (ActorName.Length == 0)
             {
@@ -125,30 +140,89 @@ namespace FoheartMC
             }
         }
 
-        // !!!弃用
-        //保存骨骼绑定数据
-        void saveBoneMaps()
-        {
-            //FileStream stream = File.Open("./FoheartMC.dat", FileMode.OpenOrCreate);
-            //BinaryFormatter binFormat = new BinaryFormatter();
-            //binFormat.Serialize(stream, mapBoneIndex);
-            //stream.Close();
-            //FileStream fs = new FileStream("./FoheartMC.dat", FileMode.Open);
-            //BinaryFormatter bf = new BinaryFormatter();
-            //mapBoneIndex = bf.Deserialize(fs) as Dictionary<uint, string>;
-            //fs.Close();
-        }
-
         //从配置文件加载骨骼映射
         void loadBoneMaps()
         {
             try
             {
-                XDocument doc = XDocument.Load(/*"E:/UnityRelease/" +*/ ConfigPath);
+                XDocument doc = XDocument.Load(ConfigName);
                 foreach (XElement element in doc.Element("ActorBones").Elements())
                 {
                     uint BoneID = Convert.ToUInt32(element.Attribute("ConnectId").Value);
                     mapBoneIndex.Add(BoneID, element.Attribute("name").Value);
+
+                    if (mapBoneInitAxisTrans.Count == 0 || !mapBoneInitAxisTrans.ContainsKey(BoneID))
+                        mapBoneInitAxisTrans.Add(BoneID, new initAxisAndRot());
+
+                    /*--------------Get local axis conversion-----------------*/
+                    string[] expectAxisAttr = new string[3] { "X", "Y", "Z" };
+                    string[] standardAxisValue = new string[6] { "+X", "-X", "+Y", "-Y", "+Z", "-Z" };
+                    int[] initAxis = new int[3] { 0, 0, 0 };
+                    for (int i = 0; i < expectAxisAttr.Length; i++)
+                    {
+                        string convertedAttr = "";
+                        if (element.Attribute(expectAxisAttr[i]) == null || element.Attribute(expectAxisAttr[i]).Value == "")
+                        {
+                            convertedAttr = expectAxisAttr[i];
+                        }
+                        else
+                        {
+                            convertedAttr = element.Attribute(expectAxisAttr[i]).Value.ToUpper();
+                        }
+
+                        if (convertedAttr.Length == 1)
+                        {
+                            convertedAttr = "+" + convertedAttr;
+                        }
+                        int[] singleInitAxis = new int[3];
+                        for (int j = 0; j < standardAxisValue.Length; j++)
+                        {
+                            if (convertedAttr == standardAxisValue[j])
+                            {
+                                singleInitAxis[i] = (j + 1) % 2 == 0 ? -((j + 2) / 2) : ((j + 2) / 2);
+                                break;
+                            }
+                        }
+
+                        for (int k = 0; k < 3; k++)
+                        {
+                            initAxis[k] += singleInitAxis[k];
+                        }
+                    }
+                    mapBoneInitAxisTrans[BoneID].setAxis(
+                        initAxis[0],
+                        initAxis[1],
+                        initAxis[2]
+                        );
+                    /*--------------Get initial local rotation-----------------*/
+                    float[] initRot = new float[3];
+                    string[] expectRotAttr = new string[3] { "XR", "YR", "ZR" };
+
+                    for (int i = 0; i < expectRotAttr.Length; i++)
+                    {
+                        if (element.Attribute(expectRotAttr[i]) == null || element.Attribute(expectRotAttr[i]).Value == "")
+                        {
+                            initRot[i] = 0.0f;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                initRot[i] = Convert.ToSingle(element.Attribute(expectRotAttr[i]).Value);
+                            }
+                            catch (Exception e)
+                            {
+                                print("[ERROR] " + e.ToString() + " Failed conversion, please check your input!");
+                                initRot[i] = 0.0f;
+                            }
+                        }
+                    }
+                    mapBoneInitAxisTrans[BoneID].setRot(
+                        initRot[0],
+                        initRot[1],
+                        initRot[2]
+                        );
+
                 }
             }
             catch (Exception e)
@@ -160,16 +234,10 @@ namespace FoheartMC
         //this function called by The UDP thread
         public void copyData(ActorFrameData data)
         {
-            if (firstFrameData == null)
-            {
-                firstFrameData = new ActorFrameData();
-                data.CopyTo(ref firstFrameData);
-                return;
-            }
             lock (frameDataBuffer)
             {
                 data.CopyTo(ref frameDataBuffer);
-                bDataIsOK = true;
+                dataPending = true;
             }
         }
 
@@ -178,155 +246,62 @@ namespace FoheartMC
         {
             lock (frameDataBuffer)
             {
-                if (!bDataIsOK)
+                if (!dataPending)
                 {
                     return;
                 }
-                applyBoneRotations(frameDataBuffer);
+                applyBoneTransRot(frameDataBuffer);
             }
         }
 
-        public virtual void applyBoneRotations(ActorFrameData data)
+        public virtual void applyBoneTransRot(ActorFrameData data)
         {
+            Transform BoneHip = FindBone(0);
+            if (BoneHip)
+            {
+                Vector3 LocInUnity = new Vector3();
+                UInt32 scale = 1;
+                LocInUnity.Set(
+                    -data.bonePositions[0].x * scale,
+                    data.bonePositions[0].z * scale,
+                    -data.bonePositions[0].y * scale);
+                if (FixHipsLocation)
+                {
+                }
+                else
+                {
+                    BoneHip.transform.position = LocInUnity;
+                }
+            }
+            else
+            {
+                print("[ERROR] Do not find HIP, can not set actor location.");
+                return;
+            }
 
             foreach (var BoneR in data.boneRotQuat)
             {
                 Transform BoneT = FindBone(BoneR.Key);
                 if (BoneT)
                 {
-                    var BV = BoneR.Value;
-                    if (BoneR.Key == 0)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.z, BV.x, BV.y, BV.w);
-                        Quaternion rot = Quaternion.Euler(0.0f, 0.0f, -90.0f);
-                        BoneT.localRotation = rot * convQuatApply;
-                        //print("set BoneT pos:" + BoneR.Key + "pos:x y z " + data.location.x + "," + data.location.y + "," + data.location.z);
+                    var BR = BoneR.Value;
 
-                        Vector3 LoactionInUnity = new Vector3();
-                        UInt32 scale = 1;
-                        LoactionInUnity.Set(
-                            -data.bonePositions[BoneR.Key].x * scale,
-                            data.bonePositions[BoneR.Key].z * scale,
-                            -data.bonePositions[BoneR.Key].y * scale);
-
-                        if (FixHipsLocation)
-                        {
-
-                        }
-                        else
-                        {
-                            BoneT.transform.position = LoactionInUnity;
-                        }
-                    }
-                    else if (BoneR.Key == 1)
+                    float[] remoteRot = new float[3] { BR.x, BR.y, BR.z };
+                    float[] transRot = new float[3];
+                    for (int i = 0; i < transRot.Length; i++)
                     {
-                        Quaternion convQuatApply = new Quaternion(BV.z, BV.x, BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
-                    else if (BoneR.Key == 3)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.z, BV.x, BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
-                    else if (BoneR.Key == 6)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.z, BV.x, BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
+                        bool isNeg;
+                        if (mapBoneInitAxisTrans[BoneR.Key].xyz[i] < 0) isNeg = true; else isNeg = false;
+                        int tempIndex = isNeg ? (-mapBoneInitAxisTrans[BoneR.Key].xyz[i]) - 1 : mapBoneInitAxisTrans[BoneR.Key].xyz[i] - 1;
+                        transRot[i] = remoteRot[tempIndex] * (isNeg ? -1 : 1);
                     }
 
-                    /*右胳膊*/
-                    if (BoneR.Key == 7)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.x, BV.z, -BV.y, BV.w);
-                        Quaternion rot = Quaternion.Euler(180.0f, 0.0f, -90.0f);
-                        BoneT.localRotation = rot * convQuatApply;
-                    }
-                    else if (BoneR.Key == 8)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.x, BV.z, -BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
-                    else if (BoneR.Key == 9)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.x, BV.z, -BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
-                    else if (BoneR.Key == 10)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.x, BV.z, -BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
-
-                    /*左胳膊*/
-                    if (BoneR.Key == 11)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.x, -BV.z, BV.y, BV.w);
-                        Quaternion rot = Quaternion.Euler(0.0f, 0.0f, 90.0f);
-                        BoneT.localRotation = rot * convQuatApply;
-                    }
-                    else if (BoneR.Key == 12)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.x, -BV.z, BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
-                    else if (BoneR.Key == 13)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.x, -BV.z, BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
-                    else if (BoneR.Key == 14)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.x, -BV.z, BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
-                    /*右腿*/
-                    if (BoneR.Key == 15)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.z, -BV.x, -BV.y, BV.w);
-                        Quaternion rot = Quaternion.Euler(-180.0f, 0.0f, 0.0f);
-                        BoneT.localRotation = rot * convQuatApply;
-                    }
-                    else if (BoneR.Key == 16)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.z, -BV.x, -BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
-                    else if (BoneR.Key == 17)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.z, -BV.x, -BV.y, BV.w);
-                        Quaternion rot = Quaternion.Euler(0, 75.0f, 0.0f);
-                        BoneT.localRotation = rot * Quaternion.Inverse(rot) * convQuatApply * rot;
-                    }
-                    else if (BoneR.Key == 18)
-                    {
-                        Quaternion convQuatApply = new Quaternion(BV.z, -BV.x, -BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
-
-                    /*左腿*/
-                    if (BoneR.Key == 19)
-                    {
-                        Quaternion convQuatApply = new Quaternion(-BV.z, -BV.x, BV.y, BV.w);
-                        Quaternion rot = Quaternion.Euler(0, 0.0f, 180.0f);
-                        BoneT.localRotation = rot * convQuatApply;
-                    }
-                    else if (BoneR.Key == 20)
-                    {
-                        Quaternion convQuatApply = new Quaternion(-BV.z, -BV.x, BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
-                    else if (BoneR.Key == 21)
-                    {
-                        Quaternion parentQuat = BoneT.parent.localRotation;
-                        Quaternion convQuatApply = new Quaternion(-BV.z, -BV.x, BV.y, BV.w);
-                        Quaternion rot = Quaternion.Euler(0, 75.0f, 0.0f);
-                        BoneT.localRotation = rot * Quaternion.Inverse(rot) * convQuatApply * rot;
-                    }
-                    else if (BoneR.Key == 22)
-                    {
-                        Quaternion convQuatApply = new Quaternion(-BV.z, -BV.x, BV.y, BV.w);
-                        BoneT.localRotation = convQuatApply;
-                    }
+                    Quaternion convQuatApply = new Quaternion(transRot[0], transRot[1], transRot[2], BR.w);
+                    Quaternion rot = Quaternion.Euler(
+                        mapBoneInitAxisTrans[BoneR.Key].xryrzr[0],
+                        mapBoneInitAxisTrans[BoneR.Key].xryrzr[1],
+                        mapBoneInitAxisTrans[BoneR.Key].xryrzr[2]);
+                    BoneT.localRotation = rot * convQuatApply;
                 }
             }
         }

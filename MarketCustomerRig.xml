@@ -10,28 +10,28 @@
 
 <!--DefaultActor-->
 <ActorBones>
-	<bone ConnectId = "0" name = "Hips"></bone>
-	<bone ConnectId = "1" name = "Spine1"></bone>
-	<bone ConnectId = "3" name = "Spine2"></bone>
-	<bone ConnectId = "6" name = "Head"></bone>
+	<bone ConnectId = "0" name = "Hips" X="Z" Y="X" Z="Y" XR="0.0" YR="0.0" ZR="-90.0"></bone>
+	<bone ConnectId = "1" name = "Spine1" X="Z" Y="X" Z="Y" XR="0.0" YR="0.0" ZR="0.0"></bone>
+	<bone ConnectId = "3" name = "Spine2" X="Z" Y="X" Z="Y" XR="0.0" YR="0.0" ZR="0.0"></bone>
+	<bone ConnectId = "6" name = "Head" X="Z" Y="X" Z="Y" XR="0.0" YR="0.0" ZR="0.0"></bone>
 	
-	<bone ConnectId = "7" name = "RightShoulder"></bone>
-	<bone ConnectId = "8" name = "RightArm"></bone>
-	<bone ConnectId = "9" name = "RightUpperArm"></bone>
-	<bone ConnectId = "10" name = "RightHand"></bone>
+	<bone ConnectId = "7" name = "RightShoulder" X="X" Y="Z" Z="-Y" XR="180.0" YR="0.0" ZR="-90.0"></bone>
+	<bone ConnectId = "8" name = "RightArm" X="X" Y="Z" Z="-Y"  XR="0.0" YR="0.0" ZR="0.0"></bone>
+	<bone ConnectId = "9" name = "RightUpperArm" X="X" Y="Z" Z="-Y"  XR="0.0" YR="0.0" ZR="0.0"></bone>
+	<bone ConnectId = "10" name = "RightHand" X="X" Y="Z" Z="-Y" XR="0.0" YR="0.0" ZR="0.0" ></bone>
 	
-	<bone ConnectId = "11" name = "LeftShoulder"></bone>
-	<bone ConnectId = "12" name = "LeftArm"></bone>
-	<bone ConnectId = "13" name = "LeftUpperArm"></bone>
-	<bone ConnectId = "14" name = "LeftHand"></bone>
+	<bone ConnectId = "11" name = "LeftShoulder" X="X" Y="-Z" Z="Y" XR="0.0" YR="0.0" ZR="90.0" ></bone>
+	<bone ConnectId = "12" name = "LeftArm" X="X" Y="-Z" Z="Y"  XR="0.0" YR="0.0" ZR="0.0" ></bone>
+	<bone ConnectId = "13" name = "LeftUpperArm" X="X" Y="-Z" Z="Y"  XR="0.0" YR="0.0" ZR="0.0" ></bone>
+	<bone ConnectId = "14" name = "LeftHand" X="X" Y="-Z" Z="Y"  XR="0.0" YR="0.0" ZR="0.0" ></bone>
 
-	<bone ConnectId = "15" name = "RightUpLeg"></bone>
-	<bone ConnectId = "16" name = "RightLeg"></bone>
-	<bone ConnectId = "17" name = "RightFoot"></bone>
-	<bone ConnectId = "18" name = "RightToe"></bone>
+	<bone ConnectId = "15" name = "RightUpLeg" X="Z" Y="-X" Z="-Y" XR="-180.0" YR="0.0" ZR="0.0" ></bone>
+	<bone ConnectId = "16" name = "RightLeg" X="Z" Y="-X" Z="-Y" XR="0.0" YR="0.0" ZR="0.0"></bone>
+	<bone ConnectId = "17" name = "RightFoot" X="Z" Y="-X" Z="-Y" XR="0.0" YR="75.0" ZR="0.0"></bone>
+	<bone ConnectId = "18" name = "RightToe" X="Z" Y="-X" Z="-Y" XR="0.0" YR="0.0" ZR="0.0"></bone>
 	
-    <bone ConnectId = "19" name = "LeftUpLeg"></bone>
-	<bone ConnectId = "20" name = "LeftLeg"></bone>
-	<bone ConnectId = "21" name = "LeftFoot"></bone>
-	<bone ConnectId = "22" name = "LeftToe"></bone>
+    <bone ConnectId = "19" name = "LeftUpLeg" X="-Z" Y="-X" Z="Y"  XR="0.0" YR="0.0" ZR="180.0"></bone>
+	<bone ConnectId = "20" name = "LeftLeg" X="-Z" Y="-X" Z="Y" XR="0.0" YR="0.0" ZR="0.0"></bone>
+	<bone ConnectId = "21" name = "LeftFoot" X="-Z" Y="-X" Z="Y" XR="0.0" YR="75.0" ZR="0.0"></bone>
+	<bone ConnectId = "22" name = "LeftToe" X="-Z" Y="-X" Z="Y" XR="0.0" YR="0.0" ZR="0.0"></bone>
 </ActorBones>
