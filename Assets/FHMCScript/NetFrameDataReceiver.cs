@@ -12,17 +12,28 @@ namespace FoheartMC
         public int UDPPort = 5001;
         //角色列表,需要手动指定
         public FoheartModel[] PlayerList;
+        public bool BonePosition;
+        public bool BoneEuler;
+        public bool BoneQuat;
         //调试文本
         string OutText;
 
         public NetFrameDataReceiver()
         {
             UDPPort = 5001;
+            BonePosition = true;
+            BoneEuler = false;
+            BoneQuat = true;
         }
 
         //初始化
         void Start()
         {
+            if (true == BoneEuler && true == BoneQuat)
+            {
+                Debug.Log("You can not set BoneEuler and BoneQuat at the same time.");
+                return;
+            }
             initRec();
         }
 
@@ -55,7 +66,7 @@ namespace FoheartMC
                 try
                 {
                     byte[] data = udpReceiver.Receive(ref endpoint);
-                    int dataErro = frameDataTemp.deComposeData(data);
+                    int dataErro = frameDataTemp.deComposeData(data,BonePosition,BoneEuler,BoneQuat);
                     if (dataErro != 0)
                     {
                         Debug.Log("Data Erro:" + dataErro);

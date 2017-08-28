@@ -18,6 +18,8 @@ namespace FoheartMC
             NONE
         };
 
+
+
         private float[] rotation2quat( float[] rotmat)
         {
             float[] q = new float[4];
@@ -60,9 +62,9 @@ namespace FoheartMC
             //Normalize the quaternion
             T = (float)Math.Sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
 
-            q[0] = -q[0] / T;
-            q[1] = -q[1] / T;
-            q[2] = -q[2] / T;
+            q[0] = q[0] / T;
+            q[1] = q[1] / T;
+            q[2] = q[2] / T;
             q[3] = q[3] / T;
 
             return q;
@@ -71,113 +73,17 @@ namespace FoheartMC
         public float[] EulerToQuat(float x, float y, float z, ChannelOrder RotOrder)
         {
             float[] RotMatrix = new float[9];
-            float[] fData = new float[4] { 0.0f, 0.0f, 0.0f, 1.0f };/*X,Y,Z,W*/
-
             float XR, YR, ZR;
 
+            float[] fData = new float[4] { 0.0f, 0.0f, 0.0f, 1.0f };/*X,Y,Z,W*/
             switch (RotOrder)
             {
-                case ChannelOrder.XYZ:
+              
+                case ChannelOrder.ZXY:
                     {
                         XR = x / 180.0f * (float)Math.PI;
                         YR = y / 180.0f * (float)Math.PI;
                         ZR = z / 180.0f * (float)Math.PI;
-
-                        float SX = (float)Math.Sin(XR);
-                        float CX = (float)Math.Cos(XR);
-                        float SY = (float)Math.Sin(YR);
-                        float CY = (float)Math.Cos(YR);
-                        float SZ = (float)Math.Sin(ZR);
-                        float CZ = (float)Math.Cos(ZR);
-
-                        RotMatrix[0] = CY * CZ;
-                        RotMatrix[3] = -CY * SZ;
-                        RotMatrix[6] = SY;
-                        RotMatrix[1] = CZ * SX * SY + CX * SZ;
-                        RotMatrix[4] = CX * CZ - SX * SY * SZ;
-                        RotMatrix[7] = -CY * SX;
-                        RotMatrix[2] = SX * SZ - CX * CZ * SY;
-                        RotMatrix[5] = CZ * SX + CX * SY * SZ;
-                        RotMatrix[8] = CX * CY;
-                        break;
-                    }
-                case ChannelOrder.XZY:
-                    {
-                        XR = x / 180.0f * (float)Math.PI;
-                        YR = z / 180.0f * (float)Math.PI;
-                        ZR = y / 180.0f * (float)Math.PI;
-
-                        float SX = (float)Math.Sin(XR);
-                        float CX = (float)Math.Cos(XR);
-                        float SY = (float)Math.Sin(YR);
-                        float CY = (float)Math.Cos(YR);
-                        float SZ = (float)Math.Sin(ZR);
-                        float CZ = (float)Math.Cos(ZR);
-
-                        RotMatrix[0] = CY * CZ;
-                        RotMatrix[3] = -SZ;
-                        RotMatrix[6] = CZ * SY;
-                        RotMatrix[1] = SX * SY + CX * CY * SZ;
-                        RotMatrix[4] = CX * CZ;
-                        RotMatrix[7] = CX * SY * SZ - CY * SX;
-                        RotMatrix[2] = CY * SX * SZ - CX * SY;
-                        RotMatrix[5] = CZ * SX;
-                        RotMatrix[8] = CX * CY + SX * SY * SZ;
-                        break;
-                    }
-                case ChannelOrder.YXZ:
-                    {
-                        XR = y / 180.0f * (float)Math.PI;
-                        YR = x / 180.0f * (float)Math.PI;
-                        ZR = z / 180.0f * (float)Math.PI;
-
-                        float SX = (float)Math.Sin(XR);
-                        float CX = (float)Math.Cos(XR);
-                        float SY = (float)Math.Sin(YR);
-                        float CY = (float)Math.Cos(YR);
-                        float SZ = (float)Math.Sin(ZR);
-                        float CZ = (float)Math.Cos(ZR);
-
-                        RotMatrix[0] = CY * CZ + SX * SY * SZ;
-                        RotMatrix[3] = CZ * SX * SY - CY * SZ;
-                        RotMatrix[6] = CX * SY;
-                        RotMatrix[1] = CX * SZ;
-                        RotMatrix[4] = CX * CZ;
-                        RotMatrix[7] = -SX;
-                        RotMatrix[2] = CY * SX * SZ - CZ * SY;
-                        RotMatrix[5] = CY * CZ * SX + SY * SZ;
-                        RotMatrix[8] = CX * CY;
-                        break;
-                    }
-                case ChannelOrder.YZX:
-                    {
-                        XR = y / 180.0f * (float)Math.PI;
-                        YR = z / 180.0f * (float)Math.PI;
-                        ZR = x / 180.0f * (float)Math.PI;
-
-                        float SX = (float)Math.Sin(XR);
-                        float CX = (float)Math.Cos(XR);
-                        float SY = (float)Math.Sin(YR);
-                        float CY = (float)Math.Cos(YR);
-                        float SZ = (float)Math.Sin(ZR);
-                        float CZ = (float)Math.Cos(ZR);
-
-                        RotMatrix[0] = CY * CZ;
-                        RotMatrix[3] = SX * SY - CX * CY * SZ;
-                        RotMatrix[6] = CX * SY + CY * SX * SZ;
-                        RotMatrix[1] = SZ;
-                        RotMatrix[4] = CX * CZ;
-                        RotMatrix[7] = -CZ * SX;
-                        RotMatrix[2] = -CZ * SY;
-                        RotMatrix[5] = CY * SX + CX * SY * SZ;
-                        RotMatrix[8] = CX * CY - SX * SY * SZ;
-                        break;
-                    }
-                case ChannelOrder.ZXY:
-                    {
-                        XR = z / 180.0f * (float)Math.PI;
-                        YR = x / 180.0f * (float)Math.PI;
-                        ZR = y / 180.0f * (float)Math.PI;
 
                         float SX = (float)Math.Sin(XR);
                         float CX = (float)Math.Cos(XR);
@@ -187,41 +93,17 @@ namespace FoheartMC
                         float CZ = (float)Math.Cos(ZR);
 
                         RotMatrix[0] = CY * CZ - SX * SY * SZ;
-                        RotMatrix[3] = -CX * SZ;
-                        RotMatrix[6] = CZ * SY + CY * SX * SZ;
-                        RotMatrix[1] = CZ * SX * SY + CY * SZ;
+                        RotMatrix[1] = -CX * SZ;
+                        RotMatrix[2] = CZ * SY + CY * SX * SZ;
+                        RotMatrix[3] = CZ * SX * SY + CY * SZ;
                         RotMatrix[4] = CX * CZ;
-                        RotMatrix[7] = SY * SZ - CY * CZ * SX;
-                        RotMatrix[2] = -CX * SY;
-                        RotMatrix[5] = SX;
+                        RotMatrix[5] = SY * SZ - CY * CZ * SX;
+                        RotMatrix[6] = -CX * SY;
+                        RotMatrix[7] = SX;
                         RotMatrix[8] = CX * CY;
                         break;
                     }
 
-                case ChannelOrder.ZYX:
-                    {
-                        XR = z / 180.0f * (float)Math.PI;
-                        YR = y / 180.0f * (float)Math.PI;
-                        ZR = x / 180.0f * (float)Math.PI;
-
-                        float SX = (float)Math.Sin(XR);
-                        float CX = (float)Math.Cos(XR);
-                        float SY = (float)Math.Sin(YR);
-                        float CY = (float)Math.Cos(YR);
-                        float SZ = (float)Math.Sin(ZR);
-                        float CZ = (float)Math.Cos(ZR);
-
-                        RotMatrix[0] = CY * CZ;
-                        RotMatrix[3] = CZ * SX * SY - CX * SZ;
-                        RotMatrix[6] = CX * CZ * SY + SX * SZ;
-                        RotMatrix[1] = CY * SZ;
-                        RotMatrix[4] = CX * CZ + SX * SY * SZ;
-                        RotMatrix[7] = CX * SY * SZ - CZ * SX;
-                        RotMatrix[2] = -SY;
-                        RotMatrix[5] = CY * SX;
-                        RotMatrix[8] = CX * CY;
-                        break;
-                    }
                 default:
                     break;
             }

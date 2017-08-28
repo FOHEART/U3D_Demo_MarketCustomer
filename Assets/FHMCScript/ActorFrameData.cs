@@ -30,7 +30,7 @@ namespace FoheartMC
         Dictionary<Byte, Vector3> boneRotEuler;
         public Dictionary<Byte, Vector3> bonePositions;
 
-        private const UInt16 EulerScale = (1 << 8);
+        private const UInt16 EulerScale = (1 << 7);
         private const UInt16 QuatScale = (1 << 8);
         private const UInt32 PositionScale = (1 << 16);
         private const UInt16 ProtocolVerPlugin = (1003);
@@ -44,7 +44,7 @@ namespace FoheartMC
         }
 
         //解析data中的数据
-        public int deComposeData(byte[] data)
+        public int deComposeData(byte[] data, bool containPos, bool containEuler, bool containQuat)
         {
             int index = 0;
             //协议版本号必须与主程序相同
@@ -75,9 +75,14 @@ namespace FoheartMC
             boneCount = data[index];
             index += Marshal.SizeOf(boneCount);
 
-            int checkDataLength = FrameHeaderSize +
-                                  boneCount * (3 * Marshal.SizeOf(new Int32())) +
-                                  boneCount * (4 * Marshal.SizeOf(new Int16()));
+            int checkDataLength = FrameHeaderSize;
+            if (containPos)
+            { checkDataLength += boneCount * (3 * Marshal.SizeOf(new Int32())); }
+            if (containEuler)
+            { checkDataLength += boneCount * (3 * Marshal.SizeOf(new Int16())); }
+            if (containQuat)
+            { checkDataLength += boneCount * (4 * Marshal.SizeOf(new Int16())); }
+
             if (checkDataLength != data.Length)
             {
                 //检查数据完整性
@@ -92,44 +97,49 @@ namespace FoheartMC
             boneRotQuat.Clear();
             for (byte i = 0; i < boneCount; i++)
             {
-                Vector3 posTemp = new Vector3();
-                posTemp.x = (float)BitConverter.ToInt32(data, index) / PositionScale;
-                index += Marshal.SizeOf(new Int32());
-                posTemp.y = (float)BitConverter.ToInt32(data, index) / PositionScale;
-                index += Marshal.SizeOf(new Int32());
-                posTemp.z = (float)BitConverter.ToInt32(data, index) / PositionScale;
-                index += Marshal.SizeOf(new Int32());
-                bonePositions.Add(i, posTemp);
+                if (containPos)
+                {
+                    Vector3 posTemp = new Vector3();
+                    posTemp.x = (float)BitConverter.ToInt32(data, index) / PositionScale;
+                    index += Marshal.SizeOf(new Int32());
+                    posTemp.y = (float)BitConverter.ToInt32(data, index) / PositionScale;
+                    index += Marshal.SizeOf(new Int32());
+                    posTemp.z = (float)BitConverter.ToInt32(data, index) / PositionScale;
+                    index += Marshal.SizeOf(new Int32());
+                    bonePositions.Add(i, posTemp);
+                }
+                if (containEuler)
+                {
+                    Vector3 eulerTemp = new Vector3();
+                    eulerTemp.x = (float)BitConverter.ToInt16(data, index) / EulerScale;
+                    index += Marshal.SizeOf(new Int16());
+                    eulerTemp.y = (float)BitConverter.ToInt16(data, index) / EulerScale;
+                    index += Marshal.SizeOf(new Int16());
+                    eulerTemp.z = (float)BitConverter.ToInt16(data, index) / EulerScale;
+                    index += Marshal.SizeOf(new Int16());
+                    boneRotEuler.Add(i, eulerTemp);
 
-                //Vector3 eulerTemp = new Vector3();
-                //eulerTemp.x = (float)BitConverter.ToInt16(data, index) / EulerScale;
-                //index += Marshal.SizeOf(new Int16());
-                //eulerTemp.y = (float)BitConverter.ToInt16(data, index) / EulerScale;
-                //index += Marshal.SizeOf(new Int16());
-                //eulerTemp.z = (float)BitConverter.ToInt16(data, index) / EulerScale;
-                //index += Marshal.SizeOf(new Int16());
-                //boneRotEuler.Add(i, eulerTemp);
-
-                Quaternion eulerTemp = new Quaternion();
-                eulerTemp.x = (float)BitConverter.ToInt16(data, index) / QuatScale;
-                index += Marshal.SizeOf(new Int16());
-                eulerTemp.y = (float)BitConverter.ToInt16(data, index) / QuatScale;
-                index += Marshal.SizeOf(new Int16());
-                eulerTemp.z = (float)BitConverter.ToInt16(data, index) / QuatScale;
-                index += Marshal.SizeOf(new Int16());
-                eulerTemp.w = (float)BitConverter.ToInt16(data, index) / QuatScale;
-                index += Marshal.SizeOf(new Int16());
-                boneRotQuat.Add(i, eulerTemp);
-
-                //Quaternion quatTemp = Quaternion.EulerAngles(
-                //    eulerTemp.x * (float)Math.PI / 180.0f,
-                //    eulerTemp.y * (float)Math.PI / 180.0f,
-                //    eulerTemp.z * (float)Math.PI / 180.0f);
-                //boneRotQuat.Add(i, quatTemp);
-
-                //FOHEARTMath fmath = new FOHEARTMath();
-                //float[] quatTemp = fmath.EulerToQuat(eulerTemp.x, eulerTemp.y, eulerTemp.z, FOHEARTMath.ChannelOrder.ZXY);
-                //boneRotQuat.Add(i, new Quaternion(quatTemp[0], quatTemp[1], quatTemp[2], quatTemp[3]));
+                    FOHEARTMath fmath = new FOHEARTMath();
+                    float[] quatTemp = fmath.EulerToQuat(
+                        eulerTemp.x,
+                        eulerTemp.y,
+                        eulerTemp.z,
+                        FOHEARTMath.ChannelOrder.ZXY);
+                    boneRotQuat.Add(i, new Quaternion(quatTemp[0], quatTemp[1], quatTemp[2], quatTemp[3]));
+                }
+                if (containQuat)
+                {
+                    Quaternion eulerTemp = new Quaternion();
+                    eulerTemp.x = (float)BitConverter.ToInt16(data, index) / QuatScale;
+                    index += Marshal.SizeOf(new Int16());
+                    eulerTemp.y = (float)BitConverter.ToInt16(data, index) / QuatScale;
+                    index += Marshal.SizeOf(new Int16());
+                    eulerTemp.z = (float)BitConverter.ToInt16(data, index) / QuatScale;
+                    index += Marshal.SizeOf(new Int16());
+                    eulerTemp.w = (float)BitConverter.ToInt16(data, index) / QuatScale;
+                    index += Marshal.SizeOf(new Int16());
+                    boneRotQuat.Add(i, eulerTemp);
+                }
             }
             return 0;//解析正确
         }

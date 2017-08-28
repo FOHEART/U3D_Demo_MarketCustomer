@@ -1,3 +1,11 @@
+FOHEART U3D Plugin v1.3.0 (2017-08-28)
+============================ 
+New Features, Improvements 
+-------------------------- 
+- 去掉了选择数据转发步骤，因为现在默认后台自动转发动作数据。
+Fixed Bugs 
+---------- 
+
 FOHEART U3D Plugin v1.3.0 beta1 (2017-08-11)
 ============================ 
 New Features, Improvements 
